@@ -69,13 +69,12 @@ public class ProdutoAlterarServiceTest {
     void precomenorIgualZero(){
         //Arrange
         produto.setPreco(0.0);
-        //Act
-        Produto newProduto = driver.alterar(produto);
-        //Assert
+        //arrange
         RuntimeException thrown = assertThrows(
             RuntimeException.class,
                 ()-> driver.alterar(produto)
         );
+        //Assert
         assertEquals("Preco invalido",thrown.getMessage());
 
 
