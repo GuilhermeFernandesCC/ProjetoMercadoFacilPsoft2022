@@ -9,4 +9,8 @@ public interface ProdutoRepository<P,ID> {
     P update(P produto);
     void delete(P produto);
     void deleteAll();
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/master
