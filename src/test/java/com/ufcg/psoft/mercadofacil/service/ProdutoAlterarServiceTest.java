@@ -2,11 +2,9 @@ package com.ufcg.psoft.mercadofacil.service;
 
 import com.ufcg.psoft.mercadofacil.model.Produto;
 import com.ufcg.psoft.mercadofacil.repository.ProdutoRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -69,7 +67,7 @@ public class ProdutoAlterarServiceTest {
     void precomenorIgualZero(){
         //Arrange
         produto.setPreco(0.0);
-        //arrange
+        //Act
         RuntimeException thrown = assertThrows(
             RuntimeException.class,
                 ()-> driver.alterar(produto)
