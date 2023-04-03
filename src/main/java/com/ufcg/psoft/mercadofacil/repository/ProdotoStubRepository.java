@@ -1,9 +1,11 @@
 package com.ufcg.psoft.mercadofacil.repository;
 
 import com.ufcg.psoft.mercadofacil.model.Produto;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class ProdotoStubRepository implements ProdutoRepository<Produto,Long> {
     @Override
     public Produto save(Produto produto) {
@@ -11,7 +13,16 @@ public class ProdotoStubRepository implements ProdutoRepository<Produto,Long> {
     }
 
     @Override
-    public Produto find(Long aLong) {
+    public Produto find(Long id) {
+        if(id ==10L){
+            return Produto.builder()
+                    .id(id)
+                    .codigoBarras("7899137500104")
+                    .nome("Produto Dez")
+                    .fabricante("Empresa Dez")
+                    .preco(450.00)
+                    .build();
+        }
         return null;
     }
 
@@ -22,6 +33,15 @@ public class ProdotoStubRepository implements ProdutoRepository<Produto,Long> {
 
     @Override
     public Produto update(Produto produto) {
+        if(produto.getId() == 10L){
+            return Produto.builder()
+                    .id(produto.getId())
+                    .codigoBarras("7899137500104")
+                    .nome("Produto Dez Alterado")
+                    .fabricante("Empresa Dez")
+                    .preco(450.00)
+                    .build();
+        }
         return null;
     }
 

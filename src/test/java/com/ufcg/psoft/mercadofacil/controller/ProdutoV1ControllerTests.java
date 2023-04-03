@@ -1,8 +1,8 @@
 package com.ufcg.psoft.mercadofacil.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.mercadofacil.model.Produto;
+import com.ufcg.psoft.mercadofacil.repository.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,42 +20,39 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DisplayName("Teste do controlador de produto")
-public class ProdutoV1Controller {
+@DisplayName("Testes do controlador de produto")
+public class ProdutoV1ControllerTests {
 
     @Autowired
-    MockMvc mockMvc ;
+    MockMvc driver ;
 
-    ObjectMapper objectMapper;
+    @Autowired
+    ProdutoRepository<Produto,Long> produtoRepository;
+
+    ObjectMapper objectMapper = new ObjectMapper();
     Produto produto;
 
     @BeforeEach
     void setup(){
-        produto = Produto.builder()
-                .id(10L)
-                .codigoBarras("4012345678901")
-                .fabricante("Empresa 1")
-                .nome("Produto 1")
-                .preco(200.00)
-                .build();
+        produto = produtoRepository.find(10L);
     }
 
     @Test
     @DisplayName("Quando altera o produto com nome válido")
     void alteraProdutoNomeValido() throws Exception {
         //Arrange
-        produto.setNome("chiclete");
-        //Act
-        String produtoModificadoJSON = mockMvc.perform(put("/produtos/"+10)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(produto)))
+        produto.setNome("Produto Dez Alterado");
 
+        //Act
+        String responseoJsonString = driver.perform(put("/v1/produtos/"+produto.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(produto)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn().getResponse().getContentAsString();
+        Produto resultado = objectMapper.readValue(responseoJsonString,Produto.class);
         //Assert
-        Produto produtoModificado = objectMapper.readValue(produtoModificadoJSON,Produto.class);
-        assertEquals("Chiclete",produtoModificado.getNome());
+        assertEquals(resultado.getNome(), "Produto Dez Alterado");
     }
 }
 
