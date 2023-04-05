@@ -55,7 +55,7 @@ class LoteRepositoryTests {
 
     @Test
     @DisplayName("Inserir o segudo ou posterior lote de produtos no banco")
-    void inserirSegundoOuPosteriorLoteDeProdutosNoBanco() {
+    void inserirSegundoOuPosteriorLoteDeProdutosNoBD() {
         // Arrange
         driver.deleteAll();
         Produto produto2 = Produto.builder()
@@ -77,6 +77,8 @@ class LoteRepositoryTests {
         assertNotNull(resultado);
         assertEquals(2, driver.findAll().size());
         assertEquals(produto2, resultado.getProduto());
+
+
 
     }
 
