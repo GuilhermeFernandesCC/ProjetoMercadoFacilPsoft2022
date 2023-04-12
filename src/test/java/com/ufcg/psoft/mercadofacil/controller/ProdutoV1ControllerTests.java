@@ -1,5 +1,6 @@
 package com.ufcg.psoft.mercadofacil.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.mercadofacil.model.Produto;
 import com.ufcg.psoft.mercadofacil.repository.ProdutoRepository;
@@ -10,7 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +27,7 @@ public class ProdutoV1ControllerTests {
     @Autowired
     MockMvc driver;
 
+    final String URI_PRODUTOS = "/v1/produtos";
     @Autowired
     ProdutoRepository produtoRepository;
 
@@ -55,7 +61,7 @@ public class ProdutoV1ControllerTests {
             produto.setNome("Produto Dez Alterado");
 
             // Act
-            String responseJsonString = driver.perform(put("/v1/produtos/" + produto.getId())
+            String responseJsonString = driver.perform(put(URI_PRODUTOS+"/" + produto.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(produto)))
                     .andExpect(status().isOk())
@@ -80,6 +86,48 @@ public class ProdutoV1ControllerTests {
     @DisplayName("Conjunto de casos de verificação da validação do código de barras")
     class ProdutoValidacaoCodigoDeBarras {
         // Implementar os testes aqui
+    }
+
+    @Nested
+    @DisplayName("Conjunto de casos de teste REST API (caminhos basicos)")
+    class ProdutoValidacaoRestApiBasico {
+        //getAll()
+        Produto produto1;
+        @BeforeEach
+        void setup(){
+            produto1 = produtoRepository.save(Produto.builder()
+                    .codigoDeBarras("9876543210123")
+                    .fabricante("Fabricante Vinte")
+                    .nome("Produto Vinte")
+                    .preco(200.00)
+                    .build());
+        }
+        @Test
+        @DisplayName("Teste do GetAll()")
+        void quandoUsuarioAPIGetAllProdutos() throws Exception {
+            //arrange
+            produtoRepository.save(produto);
+            produtoRepository.save(produto1);
+
+            //act
+            String responseJsonString = driver.perform(get(URI_PRODUTOS)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            List<Produto> resultados = objectMapper
+                    .readerForListOf(Produto.class)
+                    .readValue(responseJsonString);
+
+            //assert
+            assertEquals(2,resultados.size());
+        }
+        //get(id)
+        //post() -> body
+        //put(id) -> body
+        //delete(id)
+        //deleteAll
     }
 
 }
