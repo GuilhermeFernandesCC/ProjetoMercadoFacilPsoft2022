@@ -2,6 +2,8 @@ package com.ufcg.psoft.mercadofacil.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufcg.psoft.mercadofacil.dto.ProdutoPrecoDTO;
+import com.ufcg.psoft.mercadofacil.exception.CustomErrorType;
 import com.ufcg.psoft.mercadofacil.model.Produto;
 import com.ufcg.psoft.mercadofacil.repository.ProdutoRepository;
 import org.junit.jupiter.api.*;
@@ -12,11 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -128,6 +129,54 @@ public class ProdutoV1ControllerTests {
         //put(id) -> body
         //delete(id)
         //deleteAll
+
+        @Test
+        @DisplayName("Teste a API ao alterar o preço de um produto")
+        void quandoUsuarioAPIAtualizaPrecoDeUmProduto() throws Exception{
+            //Arrange
+            ProdutoPrecoDTO produtoPrecoDTO = ProdutoPrecoDTO.builder()
+                    .preco(220.00)
+                    .build();
+
+            // Act
+            String responseJsonString = driver.perform(patch(URI_PRODUTOS+"/"+produto1.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoPrecoDTO.getPreco())))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+            Produto resultado = objectMapper.readValue(responseJsonString,Produto.class);
+
+            //Assert
+            assertEquals(220.0,resultado.getPreco());
+        }
+
     }
+
+    @Nested
+    @DisplayName("Conjunto de casos de teste exceções na REST API (caminhos inesperados)")
+    class ProdutoValidacaRestApiExcecoes{
+        @Test
+        @DisplayName("Quando informamos valor de produto é menor ou igual a zero")
+        void quandoalterarPrecoProdutoMenorIgualAZero() throws Exception {
+            //Arrange
+            ProdutoPrecoDTO produtoPrecoDTO = ProdutoPrecoDTO.builder()
+                    .preco(0.0)
+                    .build();
+            //Act
+            String responseJsonString = driver.perform(patch(URI_PRODUTOS+"/"+produto.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(produtoPrecoDTO.getPreco())))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString,CustomErrorType.class);
+            //Assert
+            assertEquals("error.validation.method.argument.not.valid",resultado.getErrorCode());
+            assertEquals("Erros de validacao encontrados",resultado.getMessage());
+            assertArrayEquals(new String[]{"O valor deve ser maior que zero"},resultado.getErrors().toArray());
+        }
+    }
+
 
 }
